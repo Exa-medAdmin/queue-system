@@ -546,7 +546,7 @@ app.post('/api/restore-queues', async (req, res) => {
                   SET status = 'เสร็จสิ้น', finished_time = datetime('now', '')
                   WHERE queue_number < ? AND status = 'รอ'
                 `;
-+07:00
+'+07:00'
                 db.run(updatePreviousQueues, [queueNumber], async (err) => {
                   if (err) {
                     console.error('Error updating previous queues:', err);
