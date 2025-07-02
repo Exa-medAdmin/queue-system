@@ -309,6 +309,7 @@
             const channelStatusElement = document.getElementById('channelStatus');
             
             try {
+                // แสดงสถานะกำลังโหลดแบบสั้นๆ
                 currentQueueElement.textContent = 'กำลังโหลด...';
                 channelStatusElement.textContent = 'กำลังตรวจสอบ...';
 
@@ -359,9 +360,10 @@
 
                 if (data.success) {
                     showMessage(`✅ เรียกคิว ${data.queueNumber} สำหรับ${selectedChannel} เรียบร้อยแล้ว!`, 'success');
-                    updateCurrentQueue(); // อัปเดตข้อมูลทันที
+                    updateCurrentQueue(); // อัปเดตข้อมูลใหม่หลังเรียกคิวสำเร็จ
                 } else {
                     showMessage(`⚠️ ${data.message || 'ไม่มีคิวรออยู่ขณะนี้'}`, 'error');
+                    updateCurrentQueue(); // อัปเดตข้อมูลเผื่อมีการเปลี่ยนแปลง
                 }
 
             } catch (error) {
@@ -389,10 +391,11 @@
 
         // เริ่มต้นระบบ
         function initialize() {
-            updateCurrentQueue();
-
-            // อัปเดตข้อมูลทุก 5 วินาที
-            setInterval(updateCurrentQueue, 5000);
+            updateCurrentQueue(); // โหลดข้อมูลครั้งแรกเท่านั้น
+            
+            // ลบ auto-refresh ออกแล้ว - จะอัปเดตเฉพาะเมื่อ:
+            // 1. เปลี่ยนช่องบริการ (onchange ของ dropdown)
+            // 2. กดเรียกคิว (หลังจากได้ผลลัพธ์)
         }
 
         // รับฟังการกด Enter ในฟอร์ม
@@ -405,10 +408,10 @@
         // เริ่มต้นเมื่อหน้าเว็บโหลดเสร็จ
         document.addEventListener('DOMContentLoaded', initialize);
 
-        // รีเฟรชเมื่อกลับมาที่หน้าเว็บ
+        // อัปเดตเฉพาะเมื่อกลับมาที่หน้าเว็บ (ไม่ใช่ auto-refresh)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                updateCurrentQueue();
+                updateCurrentQueue(); // อัปเดตครั้งเดียวเมื่อกลับมา
             }
         });
     </script>
