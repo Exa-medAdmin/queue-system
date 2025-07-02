@@ -15,166 +15,122 @@
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 30px;
             color: white;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
         }
 
         .datetime {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .status-info {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .queue-table {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .table-header {
+            background: rgba(255,255,255,0.2);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 25px 20px;
+            font-weight: bold;
+            font-size: 1.4rem;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .table-row.active {
+            background: rgba(46, 204, 113, 0.2);
+            border-left: 5px solid #2ecc71;
+            animation: pulse-active 2s infinite;
+        }
+
+        .table-row.inactive {
+            background: rgba(149, 165, 166, 0.1);
+            opacity: 0.7;
+        }
+
+        .channel-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .queue-number {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .queue-number.empty {
+            font-size: 2rem;
+            opacity: 0.6;
+        }
+
+        .call-time {
             font-size: 1.2rem;
             opacity: 0.9;
         }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            opacity: 0.8;
-        }
-
-        .channels-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .channel-card {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .channel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        }
-
-        .channel-card.active {
-            background: rgba(46, 204, 113, 0.2);
-            border: 2px solid #2ecc71;
-            box-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
-        }
-
-        .channel-card.inactive {
-            background: rgba(149, 165, 166, 0.2);
-            border: 2px solid #95a5a6;
-        }
-
-        .channel-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .queue-number {
-            font-size: 4rem;
-            font-weight: bold;
-            margin: 15px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .queue-status {
-            font-size: 1.1rem;
-            margin-top: 10px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-
-        .status-active {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .status-waiting {
-            background: #95a5a6;
-            color: white;
+        .call-time.empty {
+            opacity: 0.5;
         }
 
         .footer {
             text-align: center;
             margin-top: 30px;
             opacity: 0.7;
+            font-size: 1rem;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .channels-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .queue-number {
-                font-size: 3rem;
-            }
-
-            body {
-                padding: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-number {
-                font-size: 2rem;
-            }
-
-            .queue-number {
-                font-size: 2.5rem;
-            }
+        /* Active Channel Animation */
+        @keyframes pulse-active {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0.1); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
 
         /* Loading Animation */
@@ -188,6 +144,95 @@
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .datetime {
+                font-size: 1.1rem;
+            }
+
+            .table-header,
+            .table-row {
+                padding: 15px 10px;
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .table-header {
+                font-size: 1.2rem;
+            }
+
+            .channel-name {
+                font-size: 1.1rem;
+            }
+
+            .queue-number {
+                font-size: 2.5rem;
+            }
+
+            .queue-number.empty {
+                font-size: 1.8rem;
+            }
+
+            .call-time {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .table-header,
+            .table-row {
+                padding: 12px 8px;
+            }
+
+            .table-header {
+                font-size: 1rem;
+            }
+
+            .channel-name {
+                font-size: 1rem;
+            }
+
+            .queue-number {
+                font-size: 2rem;
+            }
+
+            .queue-number.empty {
+                font-size: 1.5rem;
+            }
+
+            .call-time {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Status Colors */
+        .active .queue-number {
+            color: #2ecc71;
+        }
+
+        .inactive .queue-number {
+            color: #95a5a6;
+        }
+
+        .active .channel-name {
+            color: #2ecc71;
+        }
+
+        .inactive .channel-name {
+            color: #95a5a6;
+        }
     </style>
 </head>
 <body>
@@ -195,38 +240,179 @@
         <div class="header">
             <h1>🎫 ระบบรันคิว</h1>
             <div class="datetime" id="datetime">กำลังโหลด...</div>
-        </div>
-
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="waitingQueues">-</div>
-                <div class="stat-label">คิวที่รออยู่</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="activeChannels">-</div>
-                <div class="stat-label">ช่องที่ให้บริการ</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="completedQueues">-</div>
-                <div class="stat-label">คิวที่เสร็จแล้ว</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalQueues">-</div>
-                <div class="stat-label">คิวทั้งหมด</div>
+            <div class="status-info">
+                ช่องที่ให้บริการ: <span id="activeChannels">-</span> / 6
             </div>
         </div>
 
-        <div class="channels-grid" id="channelsGrid">
-            <!-- ช่องบริการจะถูกสร้างที่นี่โดย JavaScript -->
+        <div class="queue-table">
+            <div class="table-header">
+                <div>ช่องบริการ</div>
+                <div>คิวที่เรียก</div>
+                <div>เวลาที่เรียก</div>
+            </div>
+            <div id="queueTableBody">
+                <!-- ข้อมูลคิวจะถูกสร้างที่นี่โดย JavaScript -->
+            </div>
         </div>
 
         <div class="footer">
             <p>🔄 อัปเดตอัตโนมัติทุก 2 วินาที | สุดท้าย: <span id="lastUpdate">-</span></p>
+            <p style="font-size: 0.9rem; margin-top: 5px; opacity: 0.7;">
+                🔊 คลิกหน้าจอเพื่อเปิดใช้งานเสียงแจ้งเตือน
+            </p>
         </div>
     </div>
 
     <script>
         let isLoading = false;
+        let previousQueueData = {}; // เก็บข้อมูลคิวครั้งก่อน
+        let audioContext = null;
+        let isFirstLoad = true; // ป้องกันเสียงเมื่อโหลดครั้งแรก
+
+        // สร้างเสียงกระดิ่งแบบเรียบง่าย
+        function createBellSound() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (error) {
+                    console.log('Audio context not supported');
+                    return;
+                }
+            }
+
+            try {
+                // สร้างเสียงกระดิ่ง (โทนเสียงสูง + โทนเสียงต่ำ)
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                // ตั้งค่าความถี่เสียง (กระดิ่ง)
+                oscillator1.frequency.setValueAtTime(800, audioContext.currentTime); // โทนสูง
+                oscillator2.frequency.setValueAtTime(600, audioContext.currentTime); // โทนต่ำ
+
+                // ตั้งค่าระดับเสียง
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                // เชื่อมต่อเสียง
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // เล่นเสียง
+                oscillator1.start(audioContext.currentTime);
+                oscillator2.start(audioContext.currentTime);
+                oscillator1.stop(audioContext.currentTime + 0.5);
+                oscillator2.stop(audioContext.currentTime + 0.5);
+
+                console.log('🔔 เสียงแจ้งเตือนคิวใหม่');
+            } catch (error) {
+                console.log('Error playing bell sound:', error);
+            }
+        }
+
+        // เล่นเสียงแจ้งเตือนซ้ำ 2 ครั้ง
+        function playQueueAlert() {
+            createBellSound();
+            setTimeout(() => createBellSound(), 300); // เล่นซ้ำหลัง 0.3 วินาที
+        }
+
+        // ตรวจสอบการเปลี่ยนแปลงคิว
+        function checkQueueChanges(newQueueData) {
+            if (isFirstLoad) {
+                isFirstLoad = false;
+                return;
+            }
+
+            let hasNewQueue = false;
+
+            // ตรวจสอบแต่ละช่องบริการ
+            Object.keys(newQueueData.serviceChannels).forEach(channelName => {
+                const newData = newQueueData.serviceChannels[channelName];
+                const oldData = previousQueueData[channelName];
+
+                // ถ้ามีคิวใหม่ (คิวเปลี่ยนจากว่าง หรือ เปลี่ยนเป็นเลขใหม่)
+                if (newData && newData.currentQueue && newData.isActive) {
+                    if (!oldData || 
+                        !oldData.currentQueue || 
+                        oldData.currentQueue !== newData.currentQueue) {
+                        hasNewQueue = true;
+                        console.log(`🆕 คิวใหม่: ${channelName} เรียกคิว ${newData.currentQueue}`);
+                    }
+                }
+            });
+
+            if (hasNewQueue) {
+                playQueueAlert();
+                
+                // แสดงการแจ้งเตือนด้วยข้อความ (ถ้าต้องการ)
+                showNotification('🔔 มีการเรียกคิวใหม่!');
+            }
+        }
+
+        // แสดงการแจ้งเตือนข้อความ
+        function showNotification(message) {
+            // สร้าง element แจ้งเตือน
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(46, 204, 113, 0.9);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            `;
+            notification.textContent = message;
+
+            // เพิ่ม CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(notification);
+
+            // ลบการแจ้งเตือนหลัง 3 วินาที
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // เปิดใช้งานเสียงเมื่อผู้ใช้คลิกหน้าจอ (เพื่อให้เบราว์เซอร์อนุญาตเสียง)
+        function enableAudio() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    console.log('🔊 เปิดใช้งานเสียงแจ้งเตือนแล้ว');
+                } catch (error) {
+                    console.log('ไม่สามารถเปิดใช้งานเสียงได้');
+                }
+            }
+        }
+
+        // เพิ่ม event listener สำหรับเปิดใช้งานเสียง
+        document.addEventListener('click', enableAudio, { once: true });
+        document.addEventListener('touchstart', enableAudio, { once: true });
 
         function updateDateTime() {
             const now = new Date();
@@ -241,6 +427,21 @@
                 timeZone: 'Asia/Bangkok'
             };
             document.getElementById('datetime').textContent = now.toLocaleDateString('th-TH', options);
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '-';
+            
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString('th-TH', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (error) {
+                return '-';
+            }
         }
 
         async function loadQueueStatus() {
@@ -260,22 +461,28 @@
                 const statusData = await statusResponse.json();
                 const statsData = await statsResponse.json();
 
-                // อัปเดตสถิติ
-                document.getElementById('waitingQueues').textContent = statsData.waiting || 0;
+                // ตรวจสอบการเปลี่ยนแปลงคิวและเล่นเสียงแจ้งเตือน
+                checkQueueChanges(statusData);
+
+                // เก็บข้อมูลปัจจุบันไว้เปรียบเทียบครั้งถัดไป
+                previousQueueData = JSON.parse(JSON.stringify(statusData.serviceChannels));
+
+                // อัปเดตจำนวนช่องที่ให้บริการ
                 document.getElementById('activeChannels').textContent = statsData.activeChannels || 0;
-                document.getElementById('completedQueues').textContent = statsData.completed || 0;
-                document.getElementById('totalQueues').textContent = statsData.totalQueues || 0;
                 document.getElementById('lastUpdate').textContent = statusData.timestamp || '-';
 
-                // สร้างการ์ดช่องบริการ
-                const channelsGrid = document.getElementById('channelsGrid');
-                channelsGrid.innerHTML = '';
+                // สร้างแถวข้อมูลคิว
+                const tableBody = document.getElementById('queueTableBody');
+                tableBody.innerHTML = '';
 
-                Object.keys(statusData.serviceChannels).forEach(channelName => {
+                // สร้างแถวสำหรับแต่ละช่องบริการ (1-6)
+                for (let i = 1; i <= 6; i++) {
+                    const channelName = `ช่องบริการ ${i}`;
                     const channelData = statusData.serviceChannels[channelName];
-                    const channelCard = createChannelCard(channelName, channelData);
-                    channelsGrid.appendChild(channelCard);
-                });
+                    
+                    const row = createTableRow(channelName, channelData);
+                    tableBody.appendChild(row);
+                }
 
             } catch (error) {
                 console.error('Error loading queue status:', error);
@@ -285,28 +492,27 @@
             }
         }
 
-        function createChannelCard(channelName, channelData) {
-            const card = document.createElement('div');
-            const isActive = channelData.isActive && channelData.currentQueue;
+        function createTableRow(channelName, channelData) {
+            const row = document.createElement('div');
+            const isActive = channelData && channelData.isActive && channelData.currentQueue;
             
-            card.className = `channel-card ${isActive ? 'active' : 'inactive'}`;
+            row.className = `table-row ${isActive ? 'active' : 'inactive'}`;
             
-            const queueDisplay = channelData.currentQueue || 'ว่าง';
-            const statusText = isActive ? 'กำลังให้บริการ' : 'รอลูกค้า';
-            const statusClass = isActive ? 'status-active' : 'status-waiting';
+            const queueDisplay = channelData && channelData.currentQueue ? channelData.currentQueue : 'ว่าง';
+            const timeDisplay = isActive ? formatTime(new Date()) : '-';
 
-            card.innerHTML = `
-                <div class="channel-title">${channelName}</div>
-                <div class="queue-number">${queueDisplay}</div>
-                <div class="queue-status ${statusClass}">${statusText}</div>
+            row.innerHTML = `
+                <div class="channel-name">${channelName}</div>
+                <div class="queue-number ${!isActive ? 'empty' : ''}">${queueDisplay}</div>
+                <div class="call-time ${!isActive ? 'empty' : ''}">${timeDisplay}</div>
             `;
 
-            return card;
+            return row;
         }
 
         function showError(message) {
-            const channelsGrid = document.getElementById('channelsGrid');
-            channelsGrid.innerHTML = `
+            const tableBody = document.getElementById('queueTableBody');
+            tableBody.innerHTML = `
                 <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
                     <h2>⚠️ ${message}</h2>
                     <p>กำลังลองเชื่อมต่อใหม่...</p>
@@ -334,6 +540,11 @@
             if (!document.hidden) {
                 loadQueueStatus();
             }
+        });
+
+        // รีเฟรชเมื่อมีการเชื่อมต่อเน็ตใหม่
+        window.addEventListener('online', () => {
+            loadQueueStatus();
         });
     </script>
 </body>
