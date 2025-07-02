@@ -60,19 +60,40 @@ function getCurrentQueueStatus() {
           return;
         }
 
-        const serviceChannels = {};
-        channels.forEach(channel => {
-          serviceChannels[channel.channel_name] = {
-            currentQueue: channel.current_queue,
-            isActive: channel.is_active === 1
-          };
-        });
+        // ดึงเวลาเรียกคิวของแต่ละคิวที่กำลังให้บริการ
+        const queueQuery = `
+          SELECT queue_number, called_time 
+          FROM queues 
+          WHERE status = 'กำลังใช้บริการ' AND called_time IS NOT NULL
+        `;
 
-        resolve({
-          serviceChannels,
-          waitingQueues: waitingResult.waiting,
-          totalQueues: 1500,
-          timestamp: new Date().toLocaleString('th-TH')
+        db.all(queueQuery, (err, queueTimes) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          const serviceChannels = {};
+          channels.forEach(channel => {
+            serviceChannels[channel.channel_name] = {
+              currentQueue: channel.current_queue,
+              isActive: channel.is_active === 1
+            };
+          });
+
+          // สร้าง object เก็บเวลาเรียกคิว
+          const queueCallTimes = {};
+          queueTimes.forEach(item => {
+            queueCallTimes[item.queue_number] = item.called_time;
+          });
+
+          resolve({
+            serviceChannels,
+            queueCallTimes,
+            waitingQueues: waitingResult.waiting,
+            totalQueues: 1500,
+            timestamp: new Date().toLocaleString('th-TH')
+          });
         });
       });
     });
