@@ -335,6 +335,7 @@
                     </div>
                 </div>
                 <button class="btn btn-warning" onclick="loadStatistics()">🔄 รีเฟรชข้อมูล</button>
+                <button class="btn btn-warning" onclick="connectSSE()" style="margin-left: 10px;">📡 เชื่อมต่อใหม่</button>
             </div>
 
             <!-- รีเซ็ตระบบ -->
@@ -414,16 +415,97 @@
                 if (!response.ok) throw new Error('ไม่สามารถโหลดข้อมูลได้');
                 
                 const data = await response.json();
-                
-                document.getElementById('waitingCount').textContent = data.waiting || 0;
-                document.getElementById('activeCount').textContent = data.inProgress || 0;
-                document.getElementById('completedCount').textContent = data.completed || 0;
-                document.getElementById('activeChannels').textContent = data.activeChannels || 0;
+                updateStatisticsUI(data);
                 
             } catch (error) {
                 console.error('Error loading statistics:', error);
                 showMessage('ไม่สามารถโหลดสถิติได้', 'error');
             }
+        }
+
+        // อัปเดต UI สถิติ
+        function updateStatisticsUI(data) {
+            document.getElementById('waitingCount').textContent = data.waiting || 0;
+            document.getElementById('activeCount').textContent = data.inProgress || 0;
+            document.getElementById('completedCount').textContent = data.completed || 0;
+            document.getElementById('activeChannels').textContent = data.activeChannels || 0;
+        }
+
+        // ตัวแปรสำหรับ SSE
+        let eventSource = null;
+        let reconnectAttempts = 0;
+        let maxReconnectAttempts = 5;
+
+        // เชื่อมต่อ Server-Sent Events
+        function connectSSE() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            console.log('🔌 กำลังเชื่อมต่อ SSE สำหรับหน้าจัดการ...');
+
+            eventSource = new EventSource('/api/queue-stream');
+
+            eventSource.onopen = function() {
+                console.log('✅ เชื่อมต่อ SSE สำเร็จ (Admin)');
+                reconnectAttempts = 0;
+            };
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    // ข้าม ping messages
+                    if (data.type === 'ping') {
+                        return;
+                    }
+
+                    console.log('📡 ได้รับข้อมูลอัปเดต (Admin):', data);
+                    
+                    // อัปเดตสถิติจากข้อมูล real-time
+                    const stats = calculateStatistics(data);
+                    updateStatisticsUI(stats);
+
+                } catch (error) {
+                    console.error('Error parsing SSE data:', error);
+                }
+            };
+
+            eventSource.onerror = function(event) {
+                console.log('❌ SSE connection error (Admin):', event);
+                
+                eventSource.close();
+                
+                // ลองเชื่อมต่อใหม่
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    console.log(`🔄 กำลังลองเชื่อมต่อใหม่... ครั้งที่ ${reconnectAttempts}`);
+                    setTimeout(connectSSE, 3000 * reconnectAttempts);
+                } else {
+                    console.log('💥 ไม่สามารถเชื่อมต่อ SSE ได้ ใช้ manual refresh');
+                }
+            };
+        }
+
+        // คำนวณสถิติจากข้อมูล real-time
+        function calculateStatistics(data) {
+            let inProgress = 0;
+            let activeChannels = 0;
+
+            // นับช่องที่กำลังทำงาน
+            Object.values(data.serviceChannels).forEach(channel => {
+                if (channel.isActive && channel.currentQueue) {
+                    inProgress++;
+                    activeChannels++;
+                }
+            });
+
+            return {
+                waiting: data.waitingQueues || 0,
+                inProgress: inProgress,
+                completed: (data.totalQueues || 1500) - (data.waitingQueues || 0) - inProgress,
+                activeChannels: activeChannels
+            };
         }
 
         // รีเซ็ตระบบทั้งหมด
@@ -456,9 +538,18 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    // บันทึกประวัติการรีเซ็ต
+                    queueSystem.history.push({
+                        action: 'รีเซ็ตระบบ',
+                        timestamp: new Date(),
+                        description: 'รีเซ็ตคิวทั้งหมด 1-1500'
+                    });
+                    
                     showMessage('✅ รีเซ็ตระบบเรียบร้อยแล้ว!', 'success');
                     document.getElementById('resetCode').value = '';
-                    loadStatistics(); // รีเฟรชสถิติ
+                    
+                    // ข้อมูลจะอัปเดตอัตโนมัติผ่าน SSE ไม่ต้องเรียก loadStatistics()
+
                 } else {
                     showMessage('❌ ' + (data.error || 'เกิดข้อผิดพลาด'), 'error');
                 }
@@ -520,6 +611,13 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    // บันทึกประวัติ
+                    queueSystem.history.push({
+                        action: 'กู้คืนสถานะระบบ',
+                        timestamp: new Date(),
+                        restoredChannels: channels
+                    });
+                    
                     showMessage('✅ กู้คืนสถานะระบบเรียบร้อยแล้ว!', 'success');
                     
                     // ล้างข้อมูลในฟอร์ม
@@ -527,7 +625,8 @@
                         document.getElementById(`channel${i}`).value = '';
                     }
                     
-                    loadStatistics(); // รีเฟรชสถิติ
+                    // ข้อมูลจะอัปเดตอัตโนมัติผ่าน SSE ไม่ต้องเรียก loadStatistics()
+
                 } else {
                     showMessage('❌ ' + (data.error || 'เกิดข้อผิดพลาด'), 'error');
                 }
@@ -591,14 +690,35 @@
 
         // เริ่มต้นระบบ
         function initialize() {
-            loadStatistics();
+            loadStatistics(); // โหลดข้อมูลครั้งแรก
+            connectSSE(); // เชื่อมต่อ SSE สำหรับ real-time updates
             
-            // อัปเดตสถิติทุก 10 วินาที
-            setInterval(loadStatistics, 10000);
+            // ลบ auto-refresh ออกแล้ว - ใช้ SSE แทน
         }
 
         // เริ่มต้นเมื่อหน้าเว็บโหลดเสร็จ
         document.addEventListener('DOMContentLoaded', initialize);
+
+        // รีเชื่อมต่อเมื่อกลับมาที่หน้าเว็บ
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && (!eventSource || eventSource.readyState === EventSource.CLOSED)) {
+                connectSSE();
+            }
+        });
+
+        // รีเชื่อมต่อเมื่อมีการเชื่อมต่อเน็ตใหม่
+        window.addEventListener('online', () => {
+            if (!eventSource || eventSource.readyState === EventSource.CLOSED) {
+                connectSSE();
+            }
+        });
+
+        // ปิดการเชื่อมต่อเมื่อปิดหน้าเว็บ
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
 
         // เพิ่มปุ่มช่วยเหลือ
         document.addEventListener('DOMContentLoaded', () => {
@@ -613,6 +733,7 @@
                     <li><strong>เลขคิว 0 หรือว่าง:</strong> หมายถึงช่องนั้นไม่ได้ให้บริการ</li>
                     <li><strong>ตัวอย่าง:</strong> <button class="btn" style="font-size: 0.9rem; padding: 5px 10px;" onclick="fillSampleData()">🎯 เติมข้อมูลตัวอย่าง</button></li>
                     <li><strong>ล้างข้อมูล:</strong> <button class="btn" style="font-size: 0.9rem; padding: 5px 10px;" onclick="clearAllFields()">🧹 ล้างทั้งหมด</button></li>
+                    <li><strong>การเชื่อมต่อ:</strong> <button class="btn" style="font-size: 0.9rem; padding: 5px 10px;" onclick="connectSSE()">📡 เชื่อมต่อ Real-time</button></li>
                 </ul>
             `;
             
