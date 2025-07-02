@@ -1,4 +1,4 @@
-// server.js - Railway Version with SQLite Database
+// server.js - Railway Version with Server-Sent Events
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -6,6 +6,9 @@ const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// เก็บ SSE connections
+const sseClients = new Set();
 
 // Middleware
 app.use(express.json());
@@ -18,6 +21,63 @@ if (!fs.existsSync('./data')) {
 
 // Database Setup
 const db = new sqlite3.Database('./data/queue.db');
+
+// ฟังก์ชันส่งข้อมูลไปยัง SSE clients ทั้งหมด
+function broadcastQueueUpdate(data) {
+  const message = `data: ${JSON.stringify(data)}\n\n`;
+  
+  sseClients.forEach(client => {
+    try {
+      client.write(message);
+    } catch (error) {
+      // ลบ client ที่ขาดการเชื่อมต่อ
+      sseClients.delete(client);
+    }
+  });
+  
+  console.log(`📡 Broadcasting to ${sseClients.size} clients`);
+}
+
+// ฟังก์ชันดึงข้อมูลสถานะคิวปัจจุบัน
+function getCurrentQueueStatus() {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT channel_name, current_queue, is_active 
+      FROM service_channels 
+      ORDER BY channel_name
+    `;
+    
+    db.all(query, (err, channels) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      // นับคิวที่รออยู่
+      db.get(`SELECT COUNT(*) as waiting FROM queues WHERE status = 'รอ'`, (err, waitingResult) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const serviceChannels = {};
+        channels.forEach(channel => {
+          serviceChannels[channel.channel_name] = {
+            currentQueue: channel.current_queue,
+            isActive: channel.is_active === 1
+          };
+        });
+
+        resolve({
+          serviceChannels,
+          waitingQueues: waitingResult.waiting,
+          totalQueues: 1500,
+          timestamp: new Date().toLocaleString('th-TH')
+        });
+      });
+    });
+  });
+}
 
 // ฟังก์ชันเริ่มต้น Database
 function initializeDatabase() {
@@ -127,43 +187,57 @@ app.get('/control', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'control.html'));
 });
 
-// API: ดูสถานะคิวปัจจุบันทั้งหมด
-app.get('/api/queue-status', (req, res) => {
-  const query = `
-    SELECT channel_name, current_queue, is_active 
-    FROM service_channels 
-    ORDER BY channel_name
-  `;
-  
-  db.all(query, (err, channels) => {
-    if (err) {
-      console.error('Error getting queue status:', err);
-      return res.status(500).json({ error: 'ไม่สามารถดึงข้อมูลได้' });
-    }
-
-    // นับคิวที่รออยู่
-    db.get(`SELECT COUNT(*) as waiting FROM queues WHERE status = 'รอ'`, (err, waitingResult) => {
-      if (err) {
-        console.error('Error counting waiting queues:', err);
-        return res.status(500).json({ error: 'ไม่สามารถดึงข้อมูลได้' });
-      }
-
-      const serviceChannels = {};
-      channels.forEach(channel => {
-        serviceChannels[channel.channel_name] = {
-          currentQueue: channel.current_queue,
-          isActive: channel.is_active === 1
-        };
-      });
-
-      res.json({
-        serviceChannels,
-        waitingQueues: waitingResult.waiting,
-        totalQueues: 1500,
-        timestamp: new Date().toLocaleString('th-TH')
-      });
-    });
+// SSE Endpoint สำหรับ real-time updates
+app.get('/api/queue-stream', (req, res) => {
+  // ตั้งค่า SSE headers
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
   });
+
+  // เพิ่ม client ใหม่
+  sseClients.add(res);
+  console.log(`📱 New SSE client connected. Total: ${sseClients.size}`);
+
+  // ส่งข้อมูลปัจจุบันทันทีให้ client ใหม่
+  getCurrentQueueStatus()
+    .then(data => {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    })
+    .catch(error => {
+      console.error('Error sending initial SSE data:', error);
+    });
+
+  // ส่งข้อความ ping ทุก 30 วินาที เพื่อรักษาการเชื่อมต่อ
+  const pingInterval = setInterval(() => {
+    try {
+      res.write('data: {"type":"ping"}\n\n');
+    } catch (error) {
+      clearInterval(pingInterval);
+      sseClients.delete(res);
+    }
+  }, 30000);
+
+  // จัดการเมื่อ client ตัดการเชื่อมต่อ
+  req.on('close', () => {
+    clearInterval(pingInterval);
+    sseClients.delete(res);
+    console.log(`📱 SSE client disconnected. Total: ${sseClients.size}`);
+  });
+});
+
+// API: ดูสถานะคิวปัจจุบันทั้งหมด (สำหรับ fallback)
+app.get('/api/queue-status', async (req, res) => {
+  try {
+    const data = await getCurrentQueueStatus();
+    res.json(data);
+  } catch (error) {
+    console.error('Error getting queue status:', error);
+    res.status(500).json({ error: 'ไม่สามารถดึงข้อมูลได้' });
+  }
 });
 
 // API: ดูสถานะคิวของช่องบริการเฉพาะ
@@ -190,7 +264,7 @@ app.get('/api/queue-status/:serviceChannel', (req, res) => {
 });
 
 // API: เรียกคิวถัดไป
-app.post('/api/call-next-queue', (req, res) => {
+app.post('/api/call-next-queue', async (req, res) => {
   const { serviceChannel } = req.body;
   
   if (!serviceChannel) {
@@ -239,7 +313,7 @@ app.post('/api/call-next-queue', (req, res) => {
             WHERE channel_name = ?
           `;
 
-          db.run(updateChannel, [serviceChannel], (err) => {
+          db.run(updateChannel, [serviceChannel], async (err) => {
             if (err) {
               console.error('Error updating channel (no queue):', err);
               db.run('ROLLBACK');
@@ -247,6 +321,15 @@ app.post('/api/call-next-queue', (req, res) => {
             }
 
             db.run('COMMIT');
+            
+            // ส่งข้อมูลอัปเดตไปยัง SSE clients
+            try {
+              const updatedData = await getCurrentQueueStatus();
+              broadcastQueueUpdate(updatedData);
+            } catch (error) {
+              console.error('Error broadcasting update:', error);
+            }
+
             res.json({ 
               success: false, 
               message: 'ไม่มีคิวรออยู่ขณะนี้'
@@ -278,7 +361,7 @@ app.post('/api/call-next-queue', (req, res) => {
             WHERE channel_name = ?
           `;
 
-          db.run(updateChannel, [nextQueue.queue_number, serviceChannel], (err) => {
+          db.run(updateChannel, [nextQueue.queue_number, serviceChannel], async (err) => {
             if (err) {
               console.error('Error updating service channel:', err);
               db.run('ROLLBACK');
@@ -291,13 +374,22 @@ app.post('/api/call-next-queue', (req, res) => {
               VALUES (?, ?, 'เรียกคิว', datetime('now', 'localtime'), 'เรียกคิวเข้าให้บริการ')
             `;
 
-            db.run(insertHistory, [nextQueue.queue_number, serviceChannel], (err) => {
+            db.run(insertHistory, [nextQueue.queue_number, serviceChannel], async (err) => {
               if (err) {
                 console.error('Error inserting history:', err);
                 // ไม่ rollback เพราะ history ไม่สำคัญมาก
               }
 
               db.run('COMMIT');
+
+              // ส่งข้อมูลอัปเดตไปยัง SSE clients
+              try {
+                const updatedData = await getCurrentQueueStatus();
+                broadcastQueueUpdate(updatedData);
+              } catch (error) {
+                console.error('Error broadcasting update:', error);
+              }
+
               res.json({ 
                 success: true, 
                 queueNumber: nextQueue.queue_number,
@@ -323,7 +415,7 @@ app.post('/api/reset-all-queues', async (req, res) => {
     await initializeQueues();
     
     // รีเซ็ตช่องบริการทั้งหมด
-    db.run(`UPDATE service_channels SET current_queue = NULL, is_active = FALSE`, (err) => {
+    db.run(`UPDATE service_channels SET current_queue = NULL, is_active = FALSE`, async (err) => {
       if (err) {
         console.error('Error resetting channels:', err);
         return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการรีเซ็ตช่องบริการ' });
@@ -335,9 +427,17 @@ app.post('/api/reset-all-queues', async (req, res) => {
         VALUES ('รีเซ็ตระบบ', datetime('now', 'localtime'), 'รีเซ็ตคิวทั้งหมด 1-1500')
       `;
 
-      db.run(insertHistory, (err) => {
+      db.run(insertHistory, async (err) => {
         if (err) {
           console.error('Error inserting reset history:', err);
+        }
+
+        // ส่งข้อมูลอัปเดตไปยัง SSE clients
+        try {
+          const updatedData = await getCurrentQueueStatus();
+          broadcastQueueUpdate(updatedData);
+        } catch (error) {
+          console.error('Error broadcasting reset update:', error);
         }
 
         res.json({ 
@@ -426,7 +526,7 @@ app.post('/api/restore-queues', async (req, res) => {
                   WHERE queue_number < ? AND status = 'รอ'
                 `;
 
-                db.run(updatePreviousQueues, [queueNumber], (err) => {
+                db.run(updatePreviousQueues, [queueNumber], async (err) => {
                   if (err) {
                     console.error('Error updating previous queues:', err);
                   }
@@ -441,12 +541,21 @@ app.post('/api/restore-queues', async (req, res) => {
                       VALUES ('กู้คืนสถานะระบบ', datetime('now', 'localtime'), ?)
                     `;
 
-                    db.run(insertHistory, [JSON.stringify(channels)], (err) => {
+                    db.run(insertHistory, [JSON.stringify(channels)], async (err) => {
                       if (err) {
                         console.error('Error inserting restore history:', err);
                       }
 
                       db.run('COMMIT');
+
+                      // ส่งข้อมูลอัปเดตไปยัง SSE clients
+                      try {
+                        const updatedData = await getCurrentQueueStatus();
+                        broadcastQueueUpdate(updatedData);
+                      } catch (error) {
+                        console.error('Error broadcasting restore update:', error);
+                      }
+
                       res.json({ 
                         success: true, 
                         message: 'กู้คืนสถานะระบบเรียบร้อยแล้ว',
@@ -564,6 +673,7 @@ async function startServer() {
         console.log(`📊 Display: http://localhost:${port}/display`);
         console.log(`🎛️ Control: http://localhost:${port}/control`);
         console.log(`⚙️ Admin: http://localhost:${port}/`);
+        console.log(`📡 SSE Stream: http://localhost:${port}/api/queue-stream`);
       });
     });
   } catch (error) {
@@ -575,6 +685,17 @@ async function startServer() {
 // Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\n🔄 Shutting down gracefully...');
+  
+  // ปิด SSE connections
+  sseClients.forEach(client => {
+    try {
+      client.end();
+    } catch (error) {
+      // ignore errors during shutdown
+    }
+  });
+  sseClients.clear();
+  
   db.close((err) => {
     if (err) {
       console.error('Error closing database:', err);
@@ -587,6 +708,16 @@ process.on('SIGINT', () => {
 
 process.on('SIGTERM', () => {
   console.log('🔄 Received SIGTERM, shutting down...');
+  
+  sseClients.forEach(client => {
+    try {
+      client.end();
+    } catch (error) {
+      // ignore errors during shutdown
+    }
+  });
+  sseClients.clear();
+  
   db.close(() => {
     process.exit(0);
   });
