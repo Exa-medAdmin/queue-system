@@ -96,6 +96,8 @@
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
+            color: #333;
         }
 
         .table-row:last-child {
@@ -103,18 +105,20 @@
         }
 
         .table-row:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.95);
         }
 
         .table-row.active {
-            background: rgba(46, 204, 113, 0.2);
-            border-left: 5px solid #2ecc71;
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+            border-left: 5px solid #27ae60;
             animation: pulse-active 2s infinite;
         }
 
         .table-row.inactive {
-            background: rgba(149, 165, 166, 0.1);
-            opacity: 0.7;
+            background: rgba(149, 165, 166, 0.6);
+            color: #2c3e50;
+            opacity: 0.8;
         }
 
         .table-row.new-queue {
@@ -129,7 +133,7 @@
         .queue-number {
             font-size: 3rem;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .queue-number.empty {
@@ -161,8 +165,8 @@
         }
 
         @keyframes highlight-new {
-            0% { background: rgba(255, 215, 0, 0.6); transform: scale(1.02); }
-            100% { background: rgba(46, 204, 113, 0.2); transform: scale(1); }
+            0% { background: rgba(255, 215, 0, 0.9); transform: scale(1.02); }
+            100% { background: rgba(46, 204, 113, 0.9); transform: scale(1); }
         }
 
         @keyframes pulse {
@@ -250,26 +254,34 @@
 
         /* Status Colors */
         .active .queue-number {
-            color: #2ecc71;
+            color: white;
         }
 
         .inactive .queue-number {
-            color: #95a5a6;
+            color: #2c3e50;
         }
 
         .active .channel-name {
-            color: #2ecc71;
+            color: white;
         }
 
         .inactive .channel-name {
-            color: #95a5a6;
+            color: #2c3e50;
+        }
+
+        .active .call-time {
+            color: white;
+        }
+
+        .inactive .call-time {
+            color: #2c3e50;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎫 ระบบรันคิว</h1>
+            <h1>🏥 คิวตรวจสุขภาพฟรี</h1>
             <div class="datetime" id="datetime">กำลังโหลด...</div>
             <div class="status-info">
                 <span>ช่องที่ให้บริการ: <span id="activeChannels">-</span> / 6</span>
@@ -565,11 +577,14 @@
             const tableBody = document.getElementById('queueTableBody');
             tableBody.innerHTML = '';
 
+            // สร้าง object เก็บเวลาเรียกคิวของแต่ละคิว
+            const queueCallTimes = data.queueCallTimes || {};
+
             for (let i = 1; i <= 6; i++) {
                 const channelName = `ช่องบริการ ${i}`;
                 const channelData = data.serviceChannels[channelName];
                 
-                const row = createTableRow(channelName, channelData);
+                const row = createTableRow(channelName, channelData, queueCallTimes);
                 tableBody.appendChild(row);
             }
         }
@@ -604,14 +619,19 @@
             }
         }
 
-        function createTableRow(channelName, channelData) {
+        function createTableRow(channelName, channelData, queueCallTimes) {
             const row = document.createElement('div');
             const isActive = channelData && channelData.isActive && channelData.currentQueue;
             
             row.className = `table-row ${isActive ? 'active' : 'inactive'}`;
             
             const queueDisplay = channelData && channelData.currentQueue ? channelData.currentQueue : 'ว่าง';
-            const timeDisplay = isActive ? formatTime(new Date()) : '-';
+            
+            // ใช้เวลาจาก database แทนเวลาปัจจุบัน
+            let timeDisplay = '-';
+            if (isActive && queueCallTimes && queueCallTimes[channelData.currentQueue]) {
+                timeDisplay = formatTime(queueCallTimes[channelData.currentQueue]);
+            }
 
             row.innerHTML = `
                 <div class="channel-name">${channelName}</div>
