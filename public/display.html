@@ -126,8 +126,8 @@
         }
 
         .channel-name {
-            font-size: 1.3rem;
-            font-weight: bold;
+            font-size: 1.6rem;
+            font-weight: normal;
         }
 
         .queue-number {
@@ -247,7 +247,7 @@
             }
 
             .channel-name {
-                font-size: 1.1rem;
+                font-size: 1.4rem;
             }
 
             .queue-number {
@@ -278,7 +278,7 @@
             }
 
             .channel-name {
-                font-size: 1rem;
+                font-size: 1.2rem;
             }
 
             .queue-number {
@@ -347,7 +347,7 @@
             <div class="sound-control">
                 <div class="sound-toggle" id="soundToggle" onclick="toggleSound()">
                     <span class="sound-icon" id="soundIcon">🔊</span>
-                    <span id="soundText">เสียงเปิด</span>
+                    <span id="soundText">เปิดเสียง</span>
                 </div>
             </div>
         </div>
@@ -388,7 +388,7 @@
             } else {
                 toggle.classList.add('sound-off');
                 icon.textContent = '🔇';
-                text.textContent = 'เสียงปิด';
+                text.textContent = 'ปิดเสียง';
             }
         }
 
@@ -486,7 +486,7 @@
 
         // ไฮไลท์ช่องบริการที่มีคิวใหม่
         function highlightChannel(channelName) {
-            const channelIndex = parseInt(channelName.replace('ช่องบริการ ', '')) - 1;
+            const channelIndex = parseInt(channelName.replace('ช่อง ', '')) - 1;
             const rows = document.querySelectorAll('.table-row');
             if (rows[channelIndex]) {
                 rows[channelIndex].classList.add('new-queue');
@@ -674,7 +674,7 @@
             const queueCallTimes = data.queueCallTimes || {};
 
             for (let i = 1; i <= 6; i++) {
-                const channelName = `ช่องบริการ ${i}`;
+                const channelName = `ช่อง ${i}`;
                 const channelData = data.serviceChannels[channelName];
                 
                 const row = createTableRow(channelName, channelData, queueCallTimes);
