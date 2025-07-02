@@ -157,6 +157,48 @@
             font-size: 1rem;
         }
 
+        .sound-control {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sound-toggle {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            user-select: none;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .sound-toggle.sound-off {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .sound-toggle.sound-off:hover {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
+        .sound-icon {
+            font-size: 1.2rem;
+        }
+
         /* Animations */
         @keyframes pulse-active {
             0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
@@ -302,9 +344,12 @@
 
         <div class="footer">
             <p>⚡ อัปเดตแบบ Real-time | สุดท้าย: <span id="lastUpdate">-</span></p>
-            <p style="font-size: 0.9rem; margin-top: 5px; opacity: 0.7;">
-                🔊 คลิกหน้าจอเพื่อเปิดใช้งานเสียงแจ้งเตือน
-            </p>
+            <div class="sound-control">
+                <div class="sound-toggle" id="soundToggle" onclick="toggleSound()">
+                    <span class="sound-icon" id="soundIcon">🔊</span>
+                    <span id="soundText">เสียงเปิด</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -315,6 +360,37 @@
         let eventSource = null;
         let reconnectAttempts = 0;
         let maxReconnectAttempts = 5;
+        let soundEnabled = true; // เสียงเปิดเป็นค่า default
+
+        // ฟังก์ชันเปิด/ปิดเสียง
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            updateSoundUI();
+            
+            // เปิดใช้งาน audioContext เมื่อเปิดเสียง
+            if (soundEnabled && !audioContext) {
+                enableAudio();
+            }
+            
+            console.log(`🔊 เสียงแจ้งเตือน: ${soundEnabled ? 'เปิด' : 'ปิด'}`);
+        }
+
+        // อัปเดต UI ปุ่มเสียง
+        function updateSoundUI() {
+            const toggle = document.getElementById('soundToggle');
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            
+            if (soundEnabled) {
+                toggle.classList.remove('sound-off');
+                icon.textContent = '🔊';
+                text.textContent = 'เสียงเปิด';
+            } else {
+                toggle.classList.add('sound-off');
+                icon.textContent = '🔇';
+                text.textContent = 'เสียงปิด';
+            }
+        }
 
         // สร้างเสียงกระดิ่งแบบเรียบง่าย
         function createBellSound() {
@@ -360,6 +436,12 @@
 
         // เล่นเสียงแจ้งเตือนซ้ำ 2 ครั้ง
         function playQueueAlert() {
+            // ตรวจสอบว่าเสียงเปิดอยู่หรือไม่
+            if (!soundEnabled) {
+                console.log('🔇 เสียงถูกปิดอยู่');
+                return;
+            }
+            
             createBellSound();
             setTimeout(() => createBellSound(), 300); // เล่นซ้ำหลัง 0.3 วินาที
         }
@@ -463,10 +545,21 @@
             if (!audioContext) {
                 try {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    console.log('🔊 เปิดใช้งานเสียงแจ้งเตือนแล้ว');
+                    console.log('🔊 เปิดใช้งาน AudioContext แล้ว');
                 } catch (error) {
-                    console.log('ไม่สามารถเปิดใช้งานเสียงได้');
+                    console.log('ไม่สามารถเปิดใช้งานเสียงได้:', error);
                 }
+            }
+        }
+
+        // เปิดใช้งาน AudioContext อัตโนมัติเมื่อโหลดหน้า
+        function initializeAudio() {
+            // ลองเปิดใช้งาน AudioContext ทันที (บางเบราว์เซอร์อนุญาต)
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('🔊 เปิดใช้งาน AudioContext อัตโนมัติ');
+            } catch (error) {
+                console.log('AudioContext ต้องการ user interaction');
             }
         }
 
@@ -645,6 +738,8 @@
         // เริ่มต้นระบบ
         function initialize() {
             updateDateTime();
+            initializeAudio(); // เริ่มต้นเสียงอัตโนมัติ
+            updateSoundUI(); // อัปเดต UI ปุ่มเสียง
             connectSSE(); // เชื่อมต่อ SSE แทน polling
 
             // อัปเดตเวลาทุกวินาที
