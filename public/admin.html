@@ -118,6 +118,37 @@
             margin: 0;
         }
 
+        .total-queues-section {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .total-queues-section h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .total-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .total-input label {
+            flex: 1;
+            font-weight: bold;
+            color: #155724;
+        }
+
+        .total-input input {
+            flex: 1;
+            max-width: 150px;
+        }
+
         .btn {
             padding: 15px 30px;
             font-size: 1.1rem;
@@ -318,16 +349,20 @@
                 <h2>📊 สถิติระบบปัจจุบัน</h2>
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-card">
-                        <div class="stat-number" id="waitingCount">-</div>
-                        <div class="stat-label">คิวที่รออยู่</div>
+                        <div class="stat-number" id="totalQueues">-</div>
+                        <div class="stat-label">คิวทั้งหมด</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="completedCount">-</div>
+                        <div class="stat-label">เสร็จสิ้นแล้ว</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="activeCount">-</div>
                         <div class="stat-label">กำลังให้บริการ</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="completedCount">-</div>
-                        <div class="stat-label">เสร็จสิ้นแล้ว</div>
+                        <div class="stat-number" id="waitingCount">-</div>
+                        <div class="stat-label">คิวที่รออยู่</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="activeChannels">-</div>
@@ -335,16 +370,27 @@
                     </div>
                 </div>
                 <button class="btn btn-warning" onclick="loadStatistics()">🔄 รีเฟรชข้อมูล</button>
-                <button class="btn btn-warning" onclick="connectSSE()" style="margin-left: 10px;">📡 เชื่อมต่อใหม่</button>
             </div>
 
             <!-- รีเซ็ตระบบ -->
             <div class="section">
                 <h2>🔄 รีเซ็ตระบบทั้งหมด</h2>
+                
+                <div class="total-queues-section">
+                    <h3>📋 ตั้งค่าจำนวนคิวทั้งหมด</h3>
+                    <div class="total-input">
+                        <label for="totalQueuesInput">จำนวนคิวทั้งหมด:</label>
+                        <input type="number" id="totalQueuesInput" value="1500" min="1" max="9999" placeholder="เช่น 1500">
+                    </div>
+                    <small style="color: #155724;">
+                        💡 ระบุจำนวนคิวทั้งหมดที่ต้องการ (สูงสุด 9,999 คิว)
+                    </small>
+                </div>
+                
                 <div class="confirmation-section">
                     <h3>⚠️ คำเตือน</h3>
                     <div class="warning-text">
-                        การรีเซ็ตจะลบข้อมูลคิวทั้งหมดและสร้างคิวใหม่ 1-1500<br>
+                        การรีเซ็ตจะลบข้อมูลคิวทั้งหมดและสร้างคิวใหม่ตามจำนวนที่ระบุ<br>
                         การกระทำนี้ไม่สามารถย้อนกลับได้!
                     </div>
                     <div class="form-group">
@@ -364,28 +410,28 @@
                 
                 <div class="channels-grid">
                     <div class="channel-input">
-                        <label>ช่องบริการ 1:</label>
-                        <input type="number" id="channel1" placeholder="เลขคิว" min="0" max="1500">
+                        <label>ช่อง 1:</label>
+                        <input type="number" id="channel1" placeholder="เลขคิว" min="0">
                     </div>
                     <div class="channel-input">
-                        <label>ช่องบริการ 2:</label>
-                        <input type="number" id="channel2" placeholder="เลขคิว" min="0" max="1500">
+                        <label>ช่อง 2:</label>
+                        <input type="number" id="channel2" placeholder="เลขคิว" min="0">
                     </div>
                     <div class="channel-input">
-                        <label>ช่องบริการ 3:</label>
-                        <input type="number" id="channel3" placeholder="เลขคิว" min="0" max="1500">
+                        <label>ช่อง 3:</label>
+                        <input type="number" id="channel3" placeholder="เลขคิว" min="0">
                     </div>
                     <div class="channel-input">
-                        <label>ช่องบริการ 4:</label>
-                        <input type="number" id="channel4" placeholder="เลขคิว" min="0" max="1500">
+                        <label>ช่อง 4:</label>
+                        <input type="number" id="channel4" placeholder="เลขคิว" min="0">
                     </div>
                     <div class="channel-input">
-                        <label>ช่องบริการ 5:</label>
-                        <input type="number" id="channel5" placeholder="เลขคิว" min="0" max="1500">
+                        <label>ช่อง 5:</label>
+                        <input type="number" id="channel5" placeholder="เลขคิว" min="0">
                     </div>
                     <div class="channel-input">
-                        <label>ช่องบริการ 6:</label>
-                        <input type="number" id="channel6" placeholder="เลขคิว" min="0" max="1500">
+                        <label>ช่อง 6:</label>
+                        <input type="number" id="channel6" placeholder="เลขคิว" min="0">
                     </div>
                 </div>
                 
@@ -415,7 +461,12 @@
                 if (!response.ok) throw new Error('ไม่สามารถโหลดข้อมูลได้');
                 
                 const data = await response.json();
-                updateStatisticsUI(data);
+                
+                document.getElementById('totalQueues').textContent = data.totalQueues || 0;
+                document.getElementById('completedCount').textContent = data.completed || 0;
+                document.getElementById('activeCount').textContent = data.inProgress || 0;
+                document.getElementById('waitingCount').textContent = data.waiting || 0;
+                document.getElementById('activeChannels').textContent = data.activeChannels || 0;
                 
             } catch (error) {
                 console.error('Error loading statistics:', error);
@@ -423,94 +474,10 @@
             }
         }
 
-        // อัปเดต UI สถิติ
-        function updateStatisticsUI(data) {
-            document.getElementById('waitingCount').textContent = data.waiting || 0;
-            document.getElementById('activeCount').textContent = data.inProgress || 0;
-            document.getElementById('completedCount').textContent = data.completed || 0;
-            document.getElementById('activeChannels').textContent = data.activeChannels || 0;
-        }
-
-        // ตัวแปรสำหรับ SSE
-        let eventSource = null;
-        let reconnectAttempts = 0;
-        let maxReconnectAttempts = 5;
-
-        // เชื่อมต่อ Server-Sent Events
-        function connectSSE() {
-            if (eventSource) {
-                eventSource.close();
-            }
-
-            console.log('🔌 กำลังเชื่อมต่อ SSE สำหรับหน้าจัดการ...');
-
-            eventSource = new EventSource('/api/queue-stream');
-
-            eventSource.onopen = function() {
-                console.log('✅ เชื่อมต่อ SSE สำเร็จ (Admin)');
-                reconnectAttempts = 0;
-            };
-
-            eventSource.onmessage = function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    
-                    // ข้าม ping messages
-                    if (data.type === 'ping') {
-                        return;
-                    }
-
-                    console.log('📡 ได้รับข้อมูลอัปเดต (Admin):', data);
-                    
-                    // อัปเดตสถิติจากข้อมูล real-time
-                    const stats = calculateStatistics(data);
-                    updateStatisticsUI(stats);
-
-                } catch (error) {
-                    console.error('Error parsing SSE data:', error);
-                }
-            };
-
-            eventSource.onerror = function(event) {
-                console.log('❌ SSE connection error (Admin):', event);
-                
-                eventSource.close();
-                
-                // ลองเชื่อมต่อใหม่
-                if (reconnectAttempts < maxReconnectAttempts) {
-                    reconnectAttempts++;
-                    console.log(`🔄 กำลังลองเชื่อมต่อใหม่... ครั้งที่ ${reconnectAttempts}`);
-                    setTimeout(connectSSE, 3000 * reconnectAttempts);
-                } else {
-                    console.log('💥 ไม่สามารถเชื่อมต่อ SSE ได้ ใช้ manual refresh');
-                }
-            };
-        }
-
-        // คำนวณสถิติจากข้อมูล real-time
-        function calculateStatistics(data) {
-            let inProgress = 0;
-            let activeChannels = 0;
-
-            // นับช่องที่กำลังทำงาน
-            Object.values(data.serviceChannels).forEach(channel => {
-                if (channel.isActive && channel.currentQueue) {
-                    inProgress++;
-                    activeChannels++;
-                }
-            });
-
-            return {
-                waiting: data.waitingQueues || 0,
-                inProgress: inProgress,
-                completed: (data.totalQueues || 1500) - (data.waitingQueues || 0) - inProgress,
-                activeChannels: activeChannels
-            };
-        }
-
         // รีเซ็ตระบบทั้งหมด
         async function resetAllQueues() {
             const confirmationCode = document.getElementById('resetCode').value.trim();
+            const totalQueues = parseInt(document.getElementById('totalQueuesInput').value) || 1500;
             
             if (!confirmationCode) {
                 showMessage('กรุณากรอกรหัสยืนยัน', 'error');
@@ -522,7 +489,12 @@
                 return;
             }
 
-            if (!confirm('⚠️ คุณแน่ใจหรือไม่ที่จะรีเซ็ตระบบทั้งหมด?\n\nการกระทำนี้จะ:\n- ลบคิวทั้งหมด\n- สร้างคิวใหม่ 1-1500\n- รีเซ็ตช่องบริการทั้งหมด\n- ไม่สามารถย้อนกลับได้!')) {
+            if (totalQueues < 1 || totalQueues > 9999) {
+                showMessage('จำนวนคิวต้องอยู่ระหว่าง 1-9,999', 'error');
+                return;
+            }
+
+            if (!confirm(`⚠️ คุณแน่ใจหรือไม่ที่จะรีเซ็ตระบบทั้งหมด?\n\nการกระทำนี้จะ:\n- ลบคิวทั้งหมด\n- สร้างคิวใหม่ 1-${totalQueues}\n- รีเซ็ตช่องบริการทั้งหมด\n- ไม่สามารถย้อนกลับได้!`)) {
                 return;
             }
 
@@ -532,24 +504,18 @@
                 const response = await fetch('/api/reset-all-queues', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ confirmationCode })
+                    body: JSON.stringify({ 
+                        confirmationCode,
+                        totalQueues: totalQueues 
+                    })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    // บันทึกประวัติการรีเซ็ต
-                    queueSystem.history.push({
-                        action: 'รีเซ็ตระบบ',
-                        timestamp: new Date(),
-                        description: 'รีเซ็ตคิวทั้งหมด 1-1500'
-                    });
-                    
-                    showMessage('✅ รีเซ็ตระบบเรียบร้อยแล้ว!', 'success');
+                    showMessage(`✅ รีเซ็ตระบบเรียบร้อยแล้ว! สร้างคิว 1-${totalQueues}`, 'success');
                     document.getElementById('resetCode').value = '';
-                    
-                    // ข้อมูลจะอัปเดตอัตโนมัติผ่าน SSE ไม่ต้องเรียก loadStatistics()
-
+                    loadStatistics(); // รีเฟรชสถิติ
                 } else {
                     showMessage('❌ ' + (data.error || 'เกิดข้อผิดพลาด'), 'error');
                 }
@@ -563,12 +529,12 @@
         // กู้คืนสถานะระบบ
         async function restoreQueues() {
             const channels = {
-                'ช่องบริการ 1': parseInt(document.getElementById('channel1').value) || 0,
-                'ช่องบริการ 2': parseInt(document.getElementById('channel2').value) || 0,
-                'ช่องบริการ 3': parseInt(document.getElementById('channel3').value) || 0,
-                'ช่องบริการ 4': parseInt(document.getElementById('channel4').value) || 0,
-                'ช่องบริการ 5': parseInt(document.getElementById('channel5').value) || 0,
-                'ช่องบริการ 6': parseInt(document.getElementById('channel6').value) || 0
+                'ช่อง 1': parseInt(document.getElementById('channel1').value) || 0,
+                'ช่อง 2': parseInt(document.getElementById('channel2').value) || 0,
+                'ช่อง 3': parseInt(document.getElementById('channel3').value) || 0,
+                'ช่อง 4': parseInt(document.getElementById('channel4').value) || 0,
+                'ช่อง 5': parseInt(document.getElementById('channel5').value) || 0,
+                'ช่อง 6': parseInt(document.getElementById('channel6').value) || 0
             };
 
             // ตรวจสอบว่ามีการกรอกข้อมูลอย่างน้อย 1 ช่อง
@@ -581,11 +547,11 @@
 
             // ตรวจสอบเลขคิวที่ถูกต้อง
             const invalidQueues = Object.entries(channels)
-                .filter(([channel, queue]) => queue > 0 && (queue < 1 || queue > 1500))
+                .filter(([channel, queue]) => queue > 0 && queue < 1)
                 .map(([channel, queue]) => `${channel}: ${queue}`);
 
             if (invalidQueues.length > 0) {
-                showMessage(`เลขคิวไม่ถูกต้อง (ต้องอยู่ระหว่าง 1-1500):\n${invalidQueues.join('\n')}`, 'error');
+                showMessage(`เลขคิวไม่ถูกต้อง (ต้องมากกว่า 0):\n${invalidQueues.join('\n')}`, 'error');
                 return;
             }
 
@@ -611,13 +577,6 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // บันทึกประวัติ
-                    queueSystem.history.push({
-                        action: 'กู้คืนสถานะระบบ',
-                        timestamp: new Date(),
-                        restoredChannels: channels
-                    });
-                    
                     showMessage('✅ กู้คืนสถานะระบบเรียบร้อยแล้ว!', 'success');
                     
                     // ล้างข้อมูลในฟอร์ม
@@ -625,8 +584,7 @@
                         document.getElementById(`channel${i}`).value = '';
                     }
                     
-                    // ข้อมูลจะอัปเดตอัตโนมัติผ่าน SSE ไม่ต้องเรียก loadStatistics()
-
+                    loadStatistics(); // รีเฟรชสถิติ
                 } else {
                     showMessage('❌ ' + (data.error || 'เกิดข้อผิดพลาด'), 'error');
                 }
@@ -650,24 +608,6 @@
             }, 8000);
         }
 
-        // เติมข้อมูลตัวอย่าง
-        function fillSampleData() {
-            document.getElementById('channel1').value = '50';
-            document.getElementById('channel2').value = '75';
-            document.getElementById('channel3').value = '123';
-            document.getElementById('channel4').value = '';
-            document.getElementById('channel5').value = '200';
-            document.getElementById('channel6').value = '';
-        }
-
-        // เคลียร์ข้อมูลทั้งหมด
-        function clearAllFields() {
-            for (let i = 1; i <= 6; i++) {
-                document.getElementById(`channel${i}`).value = '';
-            }
-            document.getElementById('resetCode').value = '';
-        }
-
         // รับฟังการกด Enter
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -679,9 +619,9 @@
                     const currentIndex = inputs.indexOf(e.target);
                     const nextInput = inputs[currentIndex + 1];
                     
-                    if (nextInput) {
+                    if (nextInput && nextInput.id !== 'totalQueuesInput') {
                         nextInput.focus();
-                    } else {
+                    } else if (e.target.id.startsWith('channel')) {
                         restoreQueues();
                     }
                 }
@@ -690,35 +630,14 @@
 
         // เริ่มต้นระบบ
         function initialize() {
-            loadStatistics(); // โหลดข้อมูลครั้งแรก
-            connectSSE(); // เชื่อมต่อ SSE สำหรับ real-time updates
+            loadStatistics();
             
-            // ลบ auto-refresh ออกแล้ว - ใช้ SSE แทน
+            // อัปเดตสถิติทุก 10 วินาที
+            setInterval(loadStatistics, 10000);
         }
 
         // เริ่มต้นเมื่อหน้าเว็บโหลดเสร็จ
         document.addEventListener('DOMContentLoaded', initialize);
-
-        // รีเชื่อมต่อเมื่อกลับมาที่หน้าเว็บ
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && (!eventSource || eventSource.readyState === EventSource.CLOSED)) {
-                connectSSE();
-            }
-        });
-
-        // รีเชื่อมต่อเมื่อมีการเชื่อมต่อเน็ตใหม่
-        window.addEventListener('online', () => {
-            if (!eventSource || eventSource.readyState === EventSource.CLOSED) {
-                connectSSE();
-            }
-        });
-
-        // ปิดการเชื่อมต่อเมื่อปิดหน้าเว็บ
-        window.addEventListener('beforeunload', () => {
-            if (eventSource) {
-                eventSource.close();
-            }
-        });
 
         // เพิ่มปุ่มช่วยเหลือ
         document.addEventListener('DOMContentLoaded', () => {
@@ -728,12 +647,10 @@
                 <h2>💡 ช่วยเหลือ</h2>
                 <p style="margin-bottom: 15px;">คำแนะนำการใช้งาน:</p>
                 <ul style="margin-left: 20px; color: #666;">
-                    <li><strong>รีเซ็ตระบบ:</strong> ใช้เมื่อต้องการเริ่มต้นใหม่ทั้งหมด ต้องกรอกรหัส 12345</li>
+                    <li><strong>รีเซ็ตระบบ:</strong> ใช้เมื่อต้องการเริ่มต้นใหม่ทั้งหมด ระบุจำนวนคิวที่ต้องการและกรอกรหัส 12345</li>
                     <li><strong>กู้คืนสถานะ:</strong> ใช้เมื่อระบบล่ม กรอกเลขคิวที่แต่ละช่องกำลังให้บริการ</li>
                     <li><strong>เลขคิว 0 หรือว่าง:</strong> หมายถึงช่องนั้นไม่ได้ให้บริการ</li>
-                    <li><strong>ตัวอย่าง:</strong> <button class="btn" style="font-size: 0.9rem; padding: 5px 10px;" onclick="fillSampleData()">🎯 เติมข้อมูลตัวอย่าง</button></li>
-                    <li><strong>ล้างข้อมูล:</strong> <button class="btn" style="font-size: 0.9rem; padding: 5px 10px;" onclick="clearAllFields()">🧹 ล้างทั้งหมด</button></li>
-                    <li><strong>การเชื่อมต่อ:</strong> <button class="btn" style="font-size: 0.9rem; padding: 5px 10px;" onclick="connectSSE()">📡 เชื่อมต่อ Real-time</button></li>
+                    <li><strong>สถิติ:</strong> จะอัปเดตแบบ Real-time ตามจำนวนคิวทั้งหมดที่ตั้งไว้</li>
                 </ul>
             `;
             
