@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -81,7 +81,7 @@
         .table-header {
             background: rgba(255,255,255,0.2);
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             padding: 25px 20px;
             font-weight: bold;
             font-size: 1.4rem;
@@ -91,7 +91,7 @@
 
         .table-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             padding: 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -126,28 +126,19 @@
         }
 
         .channel-name {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: bold;
         }
 
         .queue-number {
-            font-size: 3rem;
+            font-size: 4rem;
             font-weight: bold;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .queue-number.empty {
-            font-size: 2rem;
+            font-size: 2.5rem;
             opacity: 0.6;
-        }
-
-        .call-time {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .call-time.empty {
-            opacity: 0.5;
         }
 
         .footer {
@@ -239,7 +230,7 @@
             .table-header,
             .table-row {
                 padding: 15px 10px;
-                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-columns: 1fr 1fr;
             }
 
             .table-header {
@@ -247,19 +238,15 @@
             }
 
             .channel-name {
-                font-size: 1.1rem;
+                font-size: 1.3rem;
             }
 
             .queue-number {
-                font-size: 2.5rem;
+                font-size: 3rem;
             }
 
             .queue-number.empty {
-                font-size: 1.8rem;
-            }
-
-            .call-time {
-                font-size: 1rem;
+                font-size: 2rem;
             }
         }
 
@@ -278,19 +265,15 @@
             }
 
             .channel-name {
-                font-size: 1rem;
+                font-size: 1.1rem;
             }
 
             .queue-number {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
 
             .queue-number.empty {
-                font-size: 1.5rem;
-            }
-
-            .call-time {
-                font-size: 0.9rem;
+                font-size: 1.8rem;
             }
         }
 
@@ -310,14 +293,6 @@
         .inactive .channel-name {
             color: #2c3e50;
         }
-
-        .active .call-time {
-            color: #2c3e50;
-        }
-
-        .inactive .call-time {
-            color: #2c3e50;
-        }
     </style>
 </head>
 <body>
@@ -335,7 +310,6 @@
             <div class="table-header">
                 <div>ช่องบริการ</div>
                 <div>คิวที่เรียก</div>
-                <div>เวลาที่เรียก</div>
             </div>
             <div id="queueTableBody">
                 <!-- ข้อมูลคิวจะถูกสร้างที่นี่โดย JavaScript -->
@@ -670,14 +644,11 @@
             const tableBody = document.getElementById('queueTableBody');
             tableBody.innerHTML = '';
 
-            // สร้าง object เก็บเวลาเรียกคิวของแต่ละคิว
-            const queueCallTimes = data.queueCallTimes || {};
-
             for (let i = 1; i <= 6; i++) {
                 const channelName = `ช่องบริการ ${i}`;
                 const channelData = data.serviceChannels[channelName];
                 
-                const row = createTableRow(channelName, channelData, queueCallTimes);
+                const row = createTableRow(channelName, channelData);
                 tableBody.appendChild(row);
             }
         }
@@ -697,39 +668,17 @@
             document.getElementById('datetime').textContent = now.toLocaleDateString('th-TH', options);
         }
 
-        function formatTime(timestamp) {
-            if (!timestamp) return '-';
-            
-            try {
-                const date = new Date(timestamp);
-                return date.toLocaleTimeString('th-TH', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-            } catch (error) {
-                return '-';
-            }
-        }
-
-        function createTableRow(channelName, channelData, queueCallTimes) {
+        function createTableRow(channelName, channelData) {
             const row = document.createElement('div');
             const isActive = channelData && channelData.isActive && channelData.currentQueue;
             
             row.className = `table-row ${isActive ? 'active' : 'inactive'}`;
             
             const queueDisplay = channelData && channelData.currentQueue ? channelData.currentQueue : 'ว่าง';
-            
-            // ใช้เวลาจาก database แทนเวลาปัจจุบัน
-            let timeDisplay = '-';
-            if (isActive && queueCallTimes && queueCallTimes[channelData.currentQueue]) {
-                timeDisplay = formatTime(queueCallTimes[channelData.currentQueue]);
-            }
 
             row.innerHTML = `
                 <div class="channel-name">${channelName}</div>
                 <div class="queue-number ${!isActive ? 'empty' : ''}">${queueDisplay}</div>
-                <div class="call-time ${!isActive ? 'empty' : ''}">${timeDisplay}</div>
             `;
 
             return row;
