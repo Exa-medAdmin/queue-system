@@ -84,7 +84,7 @@
             grid-template-columns: 1fr 1fr;
             padding: 25px 20px;
             font-weight: bold;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             text-align: center;
             border-bottom: 2px solid rgba(255,255,255,0.3);
         }
@@ -126,7 +126,7 @@
         }
 
         .channel-name {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
         }
 
@@ -234,11 +234,11 @@
             }
 
             .table-header {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
             }
 
             .channel-name {
-                font-size: 1.3rem;
+                font-size: 1.5rem;
             }
 
             .queue-number {
@@ -261,11 +261,11 @@
             }
 
             .table-header {
-                font-size: 1rem;
+                font-size: 1.2rem;
             }
 
             .channel-name {
-                font-size: 1.1rem;
+                font-size: 1.3rem;
             }
 
             .queue-number {
@@ -440,8 +440,10 @@
                         !oldData.currentQueue || 
                         oldData.currentQueue !== newData.currentQueue) {
                         hasNewQueue = true;
-                        changedChannels.push(channelName);
-                        console.log(`🆕 คิวใหม่: ${channelName} เรียกคิว ${newData.currentQueue}`);
+                        // แปลงชื่อช่องจาก "ช่องบริการ X" เป็น "ช่อง X" สำหรับการแสดงผล
+                        const displayChannelName = channelName.replace('ช่องบริการ', 'ช่อง');
+                        changedChannels.push(displayChannelName);
+                        console.log(`🆕 คิวใหม่: ${displayChannelName} เรียกคิว ${newData.currentQueue}`);
                     }
                 }
             });
@@ -459,7 +461,8 @@
 
         // ไฮไลท์ช่องบริการที่มีคิวใหม่
         function highlightChannel(channelName) {
-            const channelIndex = parseInt(channelName.replace('ช่องบริการ ', '')) - 1;
+            // แปลงชื่อช่องจาก "ช่อง X" กลับเป็น index (X-1)
+            const channelIndex = parseInt(channelName.replace('ช่อง ', '')) - 1;
             const rows = document.querySelectorAll('.table-row');
             if (rows[channelIndex]) {
                 rows[channelIndex].classList.add('new-queue');
@@ -643,8 +646,8 @@
             tableBody.innerHTML = '';
 
             for (let i = 1; i <= 6; i++) {
-                const channelName = `ช่องบริการ ${i}`;
-                const channelData = data.serviceChannels[channelName];
+                const channelName = `ช่อง ${i}`;
+                const channelData = data.serviceChannels[`ช่องบริการ ${i}`];
                 
                 const row = createTableRow(channelName, channelData);
                 tableBody.appendChild(row);
