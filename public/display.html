@@ -317,11 +317,10 @@
         </div>
 
         <div class="footer">
-            <p>⚡ อัปเดตแบบ Real-time</p>
             <div class="sound-control">
                 <div class="sound-toggle" id="soundToggle" onclick="toggleSound()">
                     <span class="sound-icon" id="soundIcon">🔊</span>
-                    <span id="soundText">เสียงเปิด</span>
+                    <span id="soundText">เสียงเปิดอยู่</span>
                 </div>
             </div>
         </div>
@@ -358,11 +357,11 @@
             if (soundEnabled) {
                 toggle.classList.remove('sound-off');
                 icon.textContent = '🔊';
-                text.textContent = 'เสียงเปิด';
+                text.textContent = 'เสียงเปิดอยู่';
             } else {
                 toggle.classList.add('sound-off');
                 icon.textContent = '🔇';
-                text.textContent = 'เสียงปิด';
+                text.textContent = 'เสียงปิดอยู่';
             }
         }
 
@@ -638,7 +637,6 @@
             // อัปเดตสถิติ
             document.getElementById('activeChannels').textContent = 
                 Object.values(data.serviceChannels).filter(ch => ch.isActive).length;
-            document.getElementById('lastUpdate').textContent = data.timestamp || '-';
 
             // อัปเดตตาราง
             const tableBody = document.getElementById('queueTableBody');
