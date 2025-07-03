@@ -231,7 +231,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -301,7 +301,7 @@
             }
 
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
             }
 
             .links a {
@@ -349,24 +349,12 @@
                 <h2>📊 สถิติระบบปัจจุบัน</h2>
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-card">
-                        <div class="stat-number" id="totalQueues">-</div>
-                        <div class="stat-label">คิวทั้งหมด</div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-number" id="completedCount">-</div>
-                        <div class="stat-label">เสร็จสิ้นแล้ว</div>
+                        <div class="stat-label">ให้บริการไปแล้วทั้งหมด</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="activeCount">-</div>
-                        <div class="stat-label">กำลังให้บริการ</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="waitingCount">-</div>
-                        <div class="stat-label">คิวที่รออยู่</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="activeChannels">-</div>
-                        <div class="stat-label">ช่องที่ทำงาน</div>
+                        <div class="stat-label">กำลังให้บริการทั้งหมด</div>
                     </div>
                 </div>
                 <button class="btn btn-warning" onclick="loadStatistics()">🔄 รีเฟรชข้อมูล</button>
@@ -462,11 +450,8 @@
                 
                 const data = await response.json();
                 
-                document.getElementById('totalQueues').textContent = data.totalQueues || 0;
                 document.getElementById('completedCount').textContent = data.completed || 0;
                 document.getElementById('activeCount').textContent = data.inProgress || 0;
-                document.getElementById('waitingCount').textContent = data.waiting || 0;
-                document.getElementById('activeChannels').textContent = data.activeChannels || 0;
                 
             } catch (error) {
                 console.error('Error loading statistics:', error);
