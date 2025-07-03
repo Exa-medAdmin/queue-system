@@ -265,19 +265,7 @@
                 document.getElementById('activeChannels').textContent = statsData.activeChannels || 0;
                 document.getElementById('completedQueues').textContent = statsData.completed || 0;
                 document.getElementById('totalQueues').textContent = statsData.totalQueues || 0;
-                
-                // แปลงเวลาให้เป็นไทม์โซนไทย
-                const lastUpdateTime = statusData.timestamp ? 
-                    new Date(statusData.timestamp).toLocaleString('th-TH', {
-                        timeZone: 'Asia/Bangkok',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    }) : '-';
-                document.getElementById('lastUpdate').textContent = lastUpdateTime;
+                document.getElementById('lastUpdate').textContent = statusData.timestamp || '-';
 
                 // สร้างการ์ดช่องบริการ
                 const channelsGrid = document.getElementById('channelsGrid');
@@ -285,9 +273,7 @@
 
                 Object.keys(statusData.serviceChannels).forEach(channelName => {
                     const channelData = statusData.serviceChannels[channelName];
-                    // เปลี่ยนชื่อช่องจาก "ช่องบริการ X" เป็น "ช่อง X"
-                    const displayChannelName = channelName.replace('ช่องบริการ ', 'ช่อง ');
-                    const channelCard = createChannelCard(displayChannelName, channelData);
+                    const channelCard = createChannelCard(channelName, channelData);
                     channelsGrid.appendChild(channelCard);
                 });
 
