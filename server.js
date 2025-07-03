@@ -298,7 +298,7 @@ app.post('/api/call-next-queue', async (req, res) => {
     // 1. เปลี่ยนสถานะคิวเก่าให้เป็น "เสร็จสิ้น"
     const updateOldQueue = `
       UPDATE queues 
-      SET status = 'เสร็จสิ้น', finished_time = datetime('now', '+07:00')
+      SET status = 'เสร็จสิ้น', finished_time = datetime('now', 'localtime')
       WHERE queue_number = (
         SELECT current_queue FROM service_channels WHERE channel_name = ?
       ) AND status = 'กำลังใช้บริการ'
@@ -364,7 +364,7 @@ app.post('/api/call-next-queue', async (req, res) => {
           UPDATE queues 
           SET status = 'กำลังใช้บริการ', 
               service_channel = ?, 
-              called_time = datetime('now', '+07:00')
+              called_time = datetime('now', 'localtime')
           WHERE queue_number = ?
         `;
 
@@ -392,7 +392,7 @@ app.post('/api/call-next-queue', async (req, res) => {
             // 5. บันทึกประวัติ
             const insertHistory = `
               INSERT INTO history (queue_number, service_channel, action, timestamp, details)
-              VALUES (?, ?, 'เรียกคิว', datetime('now', '+07:00'), 'เรียกคิวเข้าให้บริการ')
+              VALUES (?, ?, 'เรียกคิว', datetime('now', 'localtime'), 'เรียกคิวเข้าให้บริการ')
             `;
 
             db.run(insertHistory, [nextQueue.queue_number, serviceChannel], async (err) => {
@@ -445,7 +445,7 @@ app.post('/api/reset-all-queues', async (req, res) => {
       // บันทึกประวัติ
       const insertHistory = `
         INSERT INTO history (action, timestamp, details)
-        VALUES ('รีเซ็ตระบบ', datetime('now', '+07:00'), 'รีเซ็ตคิวทั้งหมด 1-1500')
+        VALUES ('รีเซ็ตระบบ', datetime('now', 'localtime'), 'รีเซ็ตคิวทั้งหมด 1-1500')
       `;
 
       db.run(insertHistory, async (err) => {
@@ -515,7 +515,7 @@ app.post('/api/restore-queues', async (req, res) => {
               UPDATE queues 
               SET status = 'กำลังใช้บริการ', 
                   service_channel = ?, 
-                  called_time = datetime('now', '+07:00')
+                  called_time = datetime('now', 'localtime')
               WHERE queue_number = ?
             `;
 
@@ -543,10 +543,10 @@ app.post('/api/restore-queues', async (req, res) => {
                 // ตั้งคิวก่อนหน้าให้เป็น "เสร็จสิ้น"
                 const updatePreviousQueues = `
                   UPDATE queues 
-                  SET status = 'เสร็จสิ้น', finished_time = datetime('now', '')
+                  SET status = 'เสร็จสิ้น', finished_time = datetime('now', 'localtime')
                   WHERE queue_number < ? AND status = 'รอ'
                 `;
-'+07:00'
+
                 db.run(updatePreviousQueues, [queueNumber], async (err) => {
                   if (err) {
                     console.error('Error updating previous queues:', err);
@@ -559,7 +559,7 @@ app.post('/api/restore-queues', async (req, res) => {
                     // บันทึกประวัติ
                     const insertHistory = `
                       INSERT INTO history (action, timestamp, details)
-                      VALUES ('กู้คืนสถานะระบบ', datetime('now', '+07:00'), ?)
+                      VALUES ('กู้คืนสถานะระบบ', datetime('now', 'localtime'), ?)
                     `;
 
                     db.run(insertHistory, [JSON.stringify(channels)], async (err) => {
